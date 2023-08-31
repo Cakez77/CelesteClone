@@ -1,3 +1,4 @@
+#include "schnitzel_lib.h"
 
 // #############################################################################
 //                           Platform Globals
@@ -111,10 +112,17 @@ int main()
 {
   platform_create_window(1200, 720, "Schnitzel Motor");
 
+  int penis = 5;
+
   while(running)
   {
     // Update
     platform_update_window();
+
+    SM_TRACE("Test %d", penis);
+    SM_WARN("Test");
+    SM_ERROR("Test");
+    SM_ASSERT(false, "Assertion Hit!");
   }
 
   return 0;
