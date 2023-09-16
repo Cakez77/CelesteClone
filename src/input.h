@@ -1,14 +1,17 @@
-#pragma  once
+#pragma once
+
+#include "schnitzel_lib.h"
 
 // #############################################################################
-//                           Platform Globals
+//                           Input Structs
 // #############################################################################
-static bool running = true;
+struct Input
+{
+  int screenSizeX;
+  int screenSizeY;
+};
 
 // #############################################################################
-//                           Platform Functions
+//                           Input Globals
 // #############################################################################
-bool platform_create_window(int width, int height, char* title);
-void platform_update_window();
-void* platform_load_gl_function(char* funName);
-void platform_swap_buffers();
+static Input input;

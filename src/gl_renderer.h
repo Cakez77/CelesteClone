@@ -58,6 +58,7 @@ static PFNGLDETACHSHADERPROC glDetachShader_ptr;
 static PFNGLDELETESHADERPROC glDeleteShader_ptr;
 static PFNGLDRAWELEMENTSINSTANCEDPROC glDrawElementsInstanced_ptr;
 static PFNGLGENERATEMIPMAPPROC glGenerateMipmap_ptr;
+static PFNGLDEBUGMESSAGECALLBACKPROC glDebugMessageCallback_ptr;
 
 
 void load_gl_functions()
@@ -115,6 +116,7 @@ void load_gl_functions()
   glDeleteShader_ptr = (PFNGLDELETESHADERPROC) platform_load_gl_function("glDeleteShader");
   glDrawElementsInstanced_ptr = (PFNGLDRAWELEMENTSINSTANCEDPROC) platform_load_gl_function("glDrawElementsInstanced");
   glGenerateMipmap_ptr = (PFNGLGENERATEMIPMAPPROC) platform_load_gl_function("glGenerateMipmap");
+  glDebugMessageCallback_ptr = (PFNGLDEBUGMESSAGECALLBACKPROC)platform_load_gl_function("glDebugMessageCallback");
 }
 
 // #############################################################################
@@ -378,6 +380,11 @@ void glDrawElementsInstanced(GLenum mode, GLsizei count, GLenum type, const void
 void glGenerateMipmap(GLenum target)
 {
     glGenerateMipmap_ptr(target);
+}
+
+void glDebugMessageCallback (GLDEBUGPROC callback, const void *userParam)
+{
+  glDebugMessageCallback_ptr(callback, userParam);
 }
 
 // Loaded by default it seems, but I kept them here, just in case, must be OpenGL 1.0, and static linking
