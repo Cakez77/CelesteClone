@@ -1,11 +1,26 @@
 #include "gl_renderer.h"
 
+// To Load PNG Files
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
+#include "render_interface.h"
+
+// #############################################################################
+//                           OpenGL Constants
+// #############################################################################
+const char* TEXTURE_PATH = "assets/textures/TEXTURE_ATLAS.png";
+
+
 // #############################################################################
 //                           OpenGL Structs
 // #############################################################################
 struct GLContext
 {
   GLuint programID;
+  GLuint textureID;
+  GLuint transformSBOID;
+  GLuint screenSizeID;
 };
 
 // #############################################################################
@@ -100,6 +115,56 @@ bool gl_init(BumpAllocator* transientStorage)
   glGenVertexArrays(1, &VAO);
   glBindVertexArray(VAO);
 
+  // Texture Loading using STBI
+  {
+    int width, height, channels;
+    char* data = (char*)stbi_load(TEXTURE_PATH, &width, &height, &channels, 4);
+    if(!data)
+    {
+      SM_ASSERT(false, "Failed to load texture");
+      return false;
+    }
+
+    glGenTextures(1, &glContext.textureID);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, glContext.textureID);
+
+    // set the texture wrapping/filtering options (on the currently bound texture object)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    // This setting only matters when using the GLSL texture() function
+    // When you use texelFetch() this setting has no effect,
+    // because texelFetch is designed for this purpose
+    // See: https://interactiveimmersive.io/blog/glsl/glsl-data-tricks/
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB8_ALPHA8, width, height, 
+                 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+
+    stbi_image_free(data);
+  }
+
+  // Transform Storage Buffer
+  {
+    glGenBuffers(1, &glContext.transformSBOID);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, glContext.transformSBOID);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(Transform) * MAX_TRANSFORMS,
+                 renderData.transforms, GL_DYNAMIC_DRAW);
+  }
+
+  // Uniforms
+  {
+    glContext.screenSizeID = glGetUniformLocation(glContext.programID, "screenSize");
+  }
+  
+  // sRGB output (even if input texture is non-sRGB -> don't rely on texture used)
+  // Your font is not using sRGB, for example (not that it matters there, because no actual color is sampled from it)
+  // But this could prevent some future bug when you start mixing different types of textures
+  // Of course, you still need to correctly set the image file source format when using glTexImage2D()
+  glEnable(GL_FRAMEBUFFER_SRGB);
+  glDisable(0x809D); // disable multisampling
+
   // Depth Tesing
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_GREATER);
@@ -117,7 +182,21 @@ void gl_render()
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glViewport(0, 0, input.screenSizeX, input.screenSizeY);
 
-  glDrawArrays(GL_TRIANGLES, 0, 6);
+  // Copy screen size to the GPU
+  Vec2 screenSize = {(float)input.screenSizeX, (float)input.screenSizeY};
+  glUniform2fv(glContext.screenSizeID, 1, &screenSize.x);
+
+  // Opaque Objects
+  {
+    // Copy transforms to the GPU
+    glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, sizeof(Transform) * renderData.transformCount,
+                    renderData.transforms);
+
+    glDrawArraysInstanced(GL_TRIANGLES, 0, 6, renderData.transformCount);
+
+    // Reset for next Frame
+    renderData.transformCount = 0;
+  }
 }
 
 

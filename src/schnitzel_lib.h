@@ -51,7 +51,6 @@ enum TextColor
   TEXT_COLOR_COUNT
 };
 
-
 template <typename ...Args>
 void _log(char* prefix, char* msg, TextColor textColor, Args... args)
 {
@@ -83,7 +82,6 @@ void _log(char* prefix, char* msg, TextColor textColor, Args... args)
 
   puts(textBuffer);
 }
-
 
 #define SM_TRACE(msg, ...) _log("TRACE: ", msg, TEXT_COLOR_GREEN, ##__VA_ARGS__);
 #define SM_WARN(msg, ...) _log("WARN: ", msg, TEXT_COLOR_YELLOW, ##__VA_ARGS__);
@@ -289,6 +287,21 @@ bool copy_file(char* fileName, char* outputName, BumpAllocator* bumpAllocator)
 
   return false;
 }
+
+// #############################################################################
+//                           Math stuff
+// #############################################################################
+struct Vec2
+{
+  float x;
+  float y;
+};
+
+struct IVec2
+{
+  int x;
+  int y;
+};
 
 
 
