@@ -3,7 +3,7 @@
   "configurations": [
     {
       "name": "Launch",
-      "type": "lldb",
+      "type": "cppvsdbg",
       "request": "launch",
       "program": "${workspaceFolder}/schnitzel",
       "args": [],
