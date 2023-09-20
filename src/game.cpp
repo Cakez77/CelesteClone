@@ -5,6 +5,9 @@
 // #############################################################################
 //                           Game Constants
 // #############################################################################
+constexpr int WORLD_WIDTH = 320;
+constexpr int WORLD_HEIGHT = 180;
+constexpr int TILESIZE = 8;
 
 // #############################################################################
 //                           Game Structs
@@ -13,19 +16,23 @@
 // #############################################################################
 //                           Game Functions
 // #############################################################################
-EXPORT_FN void update_game(RenderData* renderDataIn, Input* inputIn)
+EXPORT_FN void update_game(GameState* gameStateIn, RenderData* renderDataIn, Input* inputIn)
 {
   if(renderData != renderDataIn)
   {
+    gameState = gameStateIn;
     renderData = renderDataIn;
     input = inputIn;
   }
 
-  for(int x = 0; x < 10; x++)
+  if(!gameState->initialized)
   {
-    for(int y = 0; y < 10; y++)
-    {
-      draw_sprite(SPRITE_DICE, {x * 100.0f, y * 100.0f}, {100.0f, 100.0f});
-    }
+    renderData->gameCamera.dimensions = {WORLD_WIDTH, WORLD_HEIGHT};
+    gameState->initialized = true;
   }
+
+  renderData->gameCamera.position.x = 160;
+  renderData->gameCamera.position.y = 90;
+
+  draw_sprite(SPRITE_DICE, {0.0f, 0.0f});
 }
