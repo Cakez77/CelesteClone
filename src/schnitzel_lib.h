@@ -25,6 +25,7 @@
 #define EXPORT_FN
 #endif
 
+#define b8 char
 #define BIT(x) 1 << (x)
 #define KB(x) ((unsigned long long)1024 * x)
 #define MB(x) ((unsigned long long)1024 * KB(x))
@@ -100,6 +101,47 @@ void _log(char* prefix, char* msg, TextColor textColor, Args... args)
   }                               \
 }
 
+// #############################################################################
+//                           Array
+// #############################################################################
+template<typename T, int N>
+struct Array
+{
+  static constexpr int maxElements = N;
+  int count = 0;
+  T elements[N];
+
+  T& operator[](int idx)
+  {
+    SM_ASSERT(idx >= 0, "idx negative!");
+    SM_ASSERT(idx < count, "Idx out of bounds!");
+    return elements[idx];
+  }
+
+  int add(T element)
+  {
+    SM_ASSERT(count < maxElements, "Array Full!");
+    elements[count] = element;
+    return count++;
+  }
+
+  void remove_idx_and_swap(int idx)
+  {
+    SM_ASSERT(idx >= 0, "idx negative!");
+    SM_ASSERT(idx < count, "idx out of bounds!");
+    elements[idx] = elements[--count];
+  }
+
+  void clear()
+  {
+    count = 0;
+  }
+
+  bool is_full()
+  {
+    return count == N;
+  }
+};
 
 // #############################################################################
 //                           Bump Allocator
@@ -314,6 +356,11 @@ struct IVec2
 {
   int x;
   int y;
+
+  IVec2 operator-(IVec2 other)
+  {
+    return {x - other.x, y - other.y};
+  }
 };
 
 Vec2 vec_2(IVec2 v)
