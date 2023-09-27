@@ -192,7 +192,7 @@ char* bump_alloc(BumpAllocator* bumpAllocator, size_t size)
 // #############################################################################
 //                           File I/O
 // #############################################################################
-long long get_timestamp(char* file)
+long long get_timestamp(const char* file)
 {
   struct stat file_stat = {};
   stat(file, &file_stat);
@@ -336,6 +336,16 @@ bool copy_file(char* fileName, char* outputName, BumpAllocator* bumpAllocator)
 // #############################################################################
 //                           Math stuff
 // #############################################################################
+long long max(long long a, long long b)
+{
+  if(a > b)
+  {
+    return a;
+  }
+
+  return b;
+}
+
 struct Vec2
 {
   float x;

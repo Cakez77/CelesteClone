@@ -22,6 +22,9 @@ struct GLContext
   GLuint transformSBOID;
   GLuint screenSizeID;
   GLuint orthoProjectionID;
+
+  long long textureTimestamp;
+  long long shaderTimestamp;
 };
 
 // #############################################################################
@@ -47,6 +50,37 @@ static void APIENTRY gl_debug_callback(GLenum source, GLenum type, GLuint id, GL
   }
 }
 
+GLuint gl_create_shader(int shaderType, char* shaderPath, BumpAllocator* transientStorage)
+{
+  int fileSize = 0;
+  char* vertShader = read_file(shaderPath, &fileSize, transientStorage);
+  if(!vertShader)
+  {
+    SM_ASSERT(false, "Failed to load shader: %s",shaderPath);
+    return 0;
+  }
+
+  GLuint shaderID = glCreateShader(shaderType);
+  glShaderSource(shaderID, 1, &vertShader, 0);
+  glCompileShader(shaderID);
+
+  // Test if Shader compiled successfully 
+  {
+    int success;
+    char shaderLog[2048] = {};
+
+    glGetShaderiv(shaderID, GL_COMPILE_STATUS, &success);
+    if(!success)
+    {
+      glGetShaderInfoLog(shaderID, 2048, 0, shaderLog);
+      SM_ASSERT(false, "Failed to compile %s Shader, Error: %s", shaderPath, shaderLog);
+      return 0;
+    }
+  }
+
+  return shaderID;
+}
+
 
 bool gl_init(BumpAllocator* transientStorage)
 {
@@ -56,50 +90,19 @@ bool gl_init(BumpAllocator* transientStorage)
   glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
   glEnable(GL_DEBUG_OUTPUT);
 
-  GLuint vertShaderID = glCreateShader(GL_VERTEX_SHADER);
-  GLuint fragShaderID = glCreateShader(GL_FRAGMENT_SHADER);
-
-  int fileSize = 0;
-  char* vertShader = read_file("assets/shaders/quad.vert", &fileSize, transientStorage);
-  char* fragShader = read_file("assets/shaders/quad.frag", &fileSize, transientStorage);
-
-  if(!vertShader || !fragShader)
+  GLuint vertShaderID = gl_create_shader(GL_VERTEX_SHADER, 
+                                         "assets/shaders/quad.vert", transientStorage);
+  GLuint fragShaderID = gl_create_shader(GL_FRAGMENT_SHADER, 
+                                         "assets/shaders/quad.frag", transientStorage);
+  if(!vertShaderID || !fragShaderID)
   {
-    SM_ASSERT(false, "Failed to load shaders");
+    SM_ASSERT(false, "Failed to create Shaders")
     return false;
   }
 
-  glShaderSource(vertShaderID, 1, &vertShader, 0);
-  glShaderSource(fragShaderID, 1, &fragShader, 0);
-
-  glCompileShader(vertShaderID);
-  glCompileShader(fragShaderID);
-
-  // Test if Vertext Shader compiled successfully 
-  {
-    int success;
-    char shaderLog[2048] = {};
-
-    glGetShaderiv(vertShaderID, GL_COMPILE_STATUS, &success);
-    if(!success)
-    {
-      glGetShaderInfoLog(vertShaderID, 2048, 0, shaderLog);
-      SM_ASSERT(false, "Failed to compile Vertex Shaders %s", shaderLog);
-    }
-  }
-
-  // Test if Fragment Shader compiled successfully 
-  {
-    int success;
-    char shaderLog[2048] = {};
-
-    glGetShaderiv(fragShaderID, GL_COMPILE_STATUS, &success);
-    if(!success)
-    {
-      glGetShaderInfoLog(fragShaderID, 2048, 0, shaderLog);
-      SM_ASSERT(false, "Failed to compile Vertex Shaders %s", shaderLog);
-    }
-  }
+  long long timestampVert = get_timestamp("assets/shaders/quad.vert");
+  long long timestampFrag = get_timestamp("assets/shaders/quad.frag");
+  glContext.shaderTimestamp = max(timestampVert, timestampFrag);
 
   glContext.programID = glCreateProgram();
   glAttachShader(glContext.programID, vertShaderID);
@@ -142,6 +145,7 @@ bool gl_init(BumpAllocator* transientStorage)
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB8_ALPHA8, width, height, 
                  0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+    glContext.textureTimestamp = get_timestamp(TEXTURE_PATH);
 
     stbi_image_free(data);
   }
@@ -177,8 +181,56 @@ bool gl_init(BumpAllocator* transientStorage)
   return true;
 }
 
-void gl_render()
+void gl_render(BumpAllocator* transientStorage)
 {
+  // Texture Hot Reloading
+  {
+    long long currentTimestamp = get_timestamp(TEXTURE_PATH);
+
+    if(currentTimestamp > glContext.textureTimestamp)
+    {    
+      glActiveTexture(GL_TEXTURE0);
+      int width, height, nChannels;
+      char* data = (char*)stbi_load(TEXTURE_PATH, &width, &height, &nChannels, 4);
+      if(data)
+      {
+        glContext.textureTimestamp = currentTimestamp;
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB8_ALPHA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        stbi_image_free(data);
+      }
+    }
+  }
+
+  // Shader Hot Reloading
+  {
+    long long timestampVert = get_timestamp("assets/shaders/quad.vert");
+    long long timestampFrag = get_timestamp("assets/shaders/quad.frag");
+    
+    if(timestampVert > glContext.shaderTimestamp ||
+       timestampFrag > glContext.shaderTimestamp)
+    {
+      GLuint vertShaderID = gl_create_shader(GL_VERTEX_SHADER, 
+                                              "assets/shaders/quad.vert", transientStorage);
+      GLuint fragShaderID = gl_create_shader(GL_FRAGMENT_SHADER, 
+                                              "assets/shaders/quad.frag", transientStorage);
+      if(!vertShaderID || !fragShaderID)
+      {
+        SM_ASSERT(false, "Failed to create Shaders")
+        return;
+      }
+      glAttachShader(glContext.programID, vertShaderID);
+      glAttachShader(glContext.programID, fragShaderID);
+      glLinkProgram(glContext.programID);
+
+      glDetachShader(glContext.programID, vertShaderID);
+      glDetachShader(glContext.programID, fragShaderID);
+      glDeleteShader(vertShaderID);
+      glDeleteShader(fragShaderID);
+
+      glContext.shaderTimestamp = max(timestampVert, timestampFrag);
+    }
+  }
+
   glClearColor(119.0f / 255.0f, 33.0f / 255.0f, 111.0f / 255.0f, 1.0f);
   glClearDepth(0.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

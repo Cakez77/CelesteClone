@@ -68,7 +68,7 @@ int main()
     // Update
     platform_update_window();
     update_game(gameState, renderData, input);
-    gl_render();
+    gl_render(&transientStorage);
 
     platform_swap_buffers();
 
