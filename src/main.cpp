@@ -57,7 +57,7 @@ int main()
   }
 
   platform_fill_keycode_lookup_table();
-  platform_create_window(1280, 640, "Schnitzel Motor");
+  platform_create_window(1280, 720, "Schnitzel Motor");
 
   gl_init(&transientStorage);
 
