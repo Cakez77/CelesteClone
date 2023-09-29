@@ -11,6 +11,9 @@
 // Used to get the edit timestamp of files
 #include <sys/stat.h>
 
+// Obvious right?
+#include <math.h>
+
 // #############################################################################
 //                           Defines
 // #############################################################################
@@ -346,6 +349,11 @@ long long max(long long a, long long b)
   return b;
 }
 
+float lerp(float a, float b, float t)
+{
+  return a + (b - a) * t;
+}
+
 struct Vec2
 {
   float x;
@@ -376,6 +384,22 @@ struct IVec2
 Vec2 vec_2(IVec2 v)
 {
   return Vec2{(float)v.x, (float)v.y};
+}
+
+Vec2 lerp(Vec2 a, Vec2 b, float t)
+{
+  Vec2 result;
+  result.x = lerp(a.x, b.x, t);
+  result.y = lerp(a.y, b.y, t);
+  return result;
+}
+
+IVec2 lerp(IVec2 a, IVec2 b, float t)
+{
+  IVec2 result;
+  result.x = (int)floorf(lerp((float)a.x, (float)b.x, t));
+  result.y = (int)floorf(lerp((float)a.y, (float)b.y, t));
+  return result;
 }
 
 struct Vec4

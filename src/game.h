@@ -7,6 +7,8 @@
 // #############################################################################
 //                           Game Globals
 // #############################################################################
+constexpr int UPDATES_PER_SECOND = 60;
+constexpr double UPDATE_DELAY = 1.0 / UPDATES_PER_SECOND;
 constexpr int WORLD_WIDTH = 320;
 constexpr int WORLD_HEIGHT = 180;
 constexpr int TILESIZE = 8;
@@ -40,10 +42,18 @@ struct Tile
   bool isVisible;
 }; 
 
+struct Player
+{
+  IVec2 pos;
+  IVec2 prevPos;
+};
+
 struct GameState
 {
+  float updateTimer;
   bool initialized = false;
-  IVec2 playerPos;
+
+  Player player;
   
   Array<IVec2, 21> tileCoords;
   Tile worldGrid[WORLD_GRID.x][WORLD_GRID.y];
@@ -60,5 +70,8 @@ static GameState* gameState;
 // #############################################################################
 extern "C"
 {
-  EXPORT_FN void update_game(GameState* gameStateIn, RenderData* renderDataIn, Input* inputIn);
+  EXPORT_FN void update_game(GameState* gameStateIn, 
+                             RenderData* renderDataIn, 
+                             Input* inputIn, 
+                             float dt);
 }
