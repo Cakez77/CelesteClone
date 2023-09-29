@@ -46,6 +46,7 @@ struct Player
 {
   IVec2 pos;
   IVec2 prevPos;
+  Vec2 speed;
 };
 
 struct GameState
