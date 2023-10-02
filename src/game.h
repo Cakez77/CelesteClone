@@ -47,6 +47,18 @@ struct Player
   IVec2 pos;
   IVec2 prevPos;
   Vec2 speed;
+  Vec2 solidSpeed;
+};
+
+struct Solid
+{
+  SpriteID spriteID;
+  IVec2 pos;
+  IVec2 prevPos;
+  Vec2 remainder;
+  Vec2 speed;
+  int keyframeIdx;
+  Array<IVec2, 2> keyframes;
 };
 
 struct GameState
@@ -55,6 +67,7 @@ struct GameState
   bool initialized = false;
 
   Player player;
+  Array<Solid, 20> solids;
   
   Array<IVec2, 21> tileCoords;
   Tile worldGrid[WORLD_GRID.x][WORLD_GRID.y];

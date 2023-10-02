@@ -87,10 +87,10 @@ void draw_sprite(SpriteID spriteID, Vec2 pos)
   Sprite sprite = get_sprite(spriteID);
 
   Transform transform = {};
-  transform.pos = pos - vec_2(sprite.spriteSize) / 2.0f;
-  transform.size = vec_2(sprite.spriteSize);
+  transform.pos = pos - vec_2(sprite.size) / 2.0f;
+  transform.size = vec_2(sprite.size);
   transform.atlasOffset = sprite.atlasOffset;
-  transform.spriteSize = sprite.spriteSize;
+  transform.spriteSize = sprite.size;
 
   renderData->transforms.add(transform);
 }

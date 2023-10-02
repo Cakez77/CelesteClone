@@ -418,6 +418,25 @@ struct IVec2
   {
     return {x - other.x, y - other.y};
   }
+
+  IVec2& operator-=(int value)
+  {
+    x -= value; 
+    y -= value;
+    return *this;
+  }
+
+  IVec2& operator+=(int value)
+  {
+    x += value; 
+    y += value;
+    return *this;
+  }
+
+  IVec2 operator/(int scalar)
+  {
+    return {x / scalar, y / scalar};
+  }
 };
 
 Vec2 vec_2(IVec2 v)
