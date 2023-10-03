@@ -15,6 +15,13 @@
 #include <math.h>
 
 // #############################################################################
+//                           Constants
+// #############################################################################
+// WAV Files
+constexpr int NUM_CHANNELS = 2;
+constexpr int SAMPLE_RATE = 44100;
+
+// #############################################################################
 //                           Defines
 // #############################################################################
 #ifdef _WIN32
@@ -27,6 +34,8 @@
 #define DEBUG_BREAK() __builtin_trap()
 #define EXPORT_FN
 #endif
+
+#define ArraySize(x) (sizeof((x)) / sizeof((x)[0]))
 
 #define b8 char
 #define BIT(x) 1 << (x)
@@ -575,7 +584,67 @@ bool rect_collision(IRect a, IRect b)
 
 
 
+// #############################################################################
+//                           WAV File stuff
+// #############################################################################
+// Wave Files are seperated into chunks, 
+// struct chunk
+// {
+//   unsigned int id;
+//   unsigned int size; // In bytes
+//   ...
+// }
+// we are ASSUMING!!!! That we have a "Riff Chunk"
+// followed by a "Format Chunk" followed by a
+// "Data Chunk", this CAN! be wrong ofcourse
+struct WAVHeader
+{
+  // Riff Chunk
+	unsigned int riffChunkId;
+	unsigned int riffChunkSize;
+	unsigned int format;
 
+  // Format Chunk
+	unsigned int formatChunkId;
+	unsigned int formatChunkSize;
+	unsigned short audioFormat;
+	unsigned short numChannels;
+	unsigned int sampleRate;
+	unsigned int byteRate;
+	unsigned short blockAlign;
+	unsigned short bitsPerSample;
+
+  // Data Chunk
+	unsigned char dataChunkId[4];
+	unsigned int dataChunkSize;
+};
+
+struct WAVFile
+{
+	WAVHeader header;
+	char dataBegin;
+};
+
+WAVFile* load_wav(char* path, BumpAllocator* bumpAllocator)
+{
+	int fileSize = 0;
+	WAVFile* wavFile = (WAVFile*)read_file(path, &fileSize, bumpAllocator);
+	if(!wavFile) 
+  { 
+    SM_ASSERT(0, "Failed to load Wave File: %s", path);
+    return nullptr;
+  }
+
+	SM_ASSERT(wavFile->header.numChannels == NUM_CHANNELS, 
+            "We only support 2 channels for now!");
+	SM_ASSERT(wavFile->header.sampleRate == SAMPLE_RATE, 
+            "We only support 44100 sample rate for now!");
+
+	SM_ASSERT(memcmp(&wavFile->header.dataChunkId, "data", 4) == 0, 
+						"WAV File not in propper format");
+
+	return wavFile;
+}
 
 
 

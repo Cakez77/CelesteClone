@@ -4,6 +4,8 @@
 
 #include "game.h"
 
+#include "sound.h"
+
 #define APIENTRY
 #define GL_GLEXT_PROTOTYPES
 #include "glcorearb.h"
@@ -39,7 +41,7 @@ int main()
   get_delta_time();
 
   BumpAllocator transientStorage = make_bump_allocator(MB(50));
-  BumpAllocator persistentStorage = make_bump_allocator(MB(50));
+  BumpAllocator persistentStorage = make_bump_allocator(MB(256));
 
   input = (Input*)bump_alloc(&persistentStorage, sizeof(Input));
   if(!input)
@@ -62,9 +64,28 @@ int main()
     return -1;
   }
 
+  soundState = (SoundState*)bump_alloc(&persistentStorage, sizeof(SoundState));
+  if(!soundState)
+  {
+    SM_ERROR("Failed to allocate SoundState");
+    return -1;
+  }
+  soundState->transientStorage = &transientStorage;
+  soundState->allocatedsoundsBuffer = bump_alloc(&persistentStorage, SOUNDS_BUFFER_SIZE);
+  if(!soundState->allocatedsoundsBuffer)
+  {
+    SM_ERROR("Failed to allocated Sounds Buffer");
+    return -1;
+  }
+
   platform_fill_keycode_lookup_table();
   platform_create_window(1280, 720, "Schnitzel Motor");
   platform_set_vsync(true);
+  if(!platform_init_audio())
+  {
+    SM_ERROR("Failed to initialize Audio");
+    return -1;
+  }
 
   gl_init(&transientStorage);
 
@@ -76,8 +97,9 @@ int main()
 
     // Update
     platform_update_window();
-    update_game(gameState, renderData, input, dt);
+    update_game(gameState, renderData, input, soundState, dt);
     gl_render(&transientStorage);
+    platform_update_audio(dt);
 
     platform_swap_buffers();
 
@@ -90,9 +112,10 @@ int main()
 void update_game(GameState* gameStateIn, 
                 RenderData* renderDataIn, 
                 Input* inputIn,
+                SoundState* soundStateIn,
                 float dt)
 {
-  update_game_ptr(gameStateIn ,renderDataIn, inputIn, dt);
+  update_game_ptr(gameStateIn ,renderDataIn, inputIn, soundStateIn, dt);
 }
 
 double get_delta_time()

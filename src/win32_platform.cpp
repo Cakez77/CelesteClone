@@ -5,7 +5,39 @@
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
 #include <windows.h>
+#include <xaudio2.h>
 #include "wglext.h"
+
+// #############################################################################
+//                           Windows Structures
+// #############################################################################
+struct xAudioVoice : IXAudio2VoiceCallback
+{
+	IXAudio2SourceVoice* voice;
+  SoundOptions options;
+  float fadeTimer;
+  char* soundPath;
+
+  int playing;
+
+	void OnStreamEnd() noexcept
+	{
+		voice->Stop();
+    playing = false;
+	}
+
+	void OnBufferStart(void * pBufferContext) noexcept
+	{
+    playing = true;
+	}
+
+	void OnVoiceProcessingPassEnd() noexcept {}
+	void OnVoiceProcessingPassStart(UINT32 SamplesRequired) noexcept {}
+	void OnBufferEnd(void * pBufferContext) noexcept {}
+	void OnLoopEnd(void * pBufferContext) noexcept {}
+	void OnVoiceError(void * pBufferContext, HRESULT Error) noexcept {}
+};
+
 
 // #############################################################################
 //                           Windows Globals
@@ -13,6 +45,7 @@
 static HWND window;
 static HDC dc;
 static PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT_ptr;
+static xAudioVoice voiceArr[MAX_CONCURRENT_SOUNDS];
 
 // #############################################################################
 //                           Platform Implementations
@@ -484,4 +517,140 @@ void platform_fill_keycode_lookup_table()
   KeyCodeLookupTable[VK_NUMPAD7] = KEY_NUMPAD_7;
   KeyCodeLookupTable[VK_NUMPAD8] = KEY_NUMPAD_8;
   KeyCodeLookupTable[VK_NUMPAD9] = KEY_NUMPAD_9;
+}
+
+bool platform_init_audio()
+{
+  HRESULT hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+	if(FAILED(hr)) { return false; }
+
+	IXAudio2* xaudio2 = nullptr;
+	hr = XAudio2Create(&xaudio2, 0, XAUDIO2_DEFAULT_PROCESSOR);
+	if(FAILED(hr)) { return false; }
+
+	IXAudio2MasteringVoice* master_voice = nullptr;
+	hr = xaudio2->CreateMasteringVoice(&master_voice);
+	if(FAILED(hr)) { return false; }
+
+	WAVEFORMATEX wave = {};
+	wave.wFormatTag = WAVE_FORMAT_PCM;
+	wave.nChannels = NUM_CHANNELS;
+	wave.nSamplesPerSec = SAMPLE_RATE;
+	wave.wBitsPerSample = 16;
+	wave.nBlockAlign = (NUM_CHANNELS * wave.wBitsPerSample) / 8;
+	wave.nAvgBytesPerSec = SAMPLE_RATE * wave.nBlockAlign;
+
+	for(int voiceIdx = 0; voiceIdx < MAX_CONCURRENT_SOUNDS; voiceIdx++)
+	{
+		xAudioVoice* voice = &voiceArr[voiceIdx];
+		hr = xaudio2->CreateSourceVoice(&voice->voice, &wave, 0, XAUDIO2_DEFAULT_FREQ_RATIO, voice, nullptr, nullptr);
+		voice->voice->SetVolume(musicVolume);
+		if(FAILED(hr)) { return false; }
+	}
+
+	return true;
+}
+
+void platform_update_audio(float dt)
+{
+  for(int soundIdx = 0; soundIdx < soundState->playingSounds.count; soundIdx++)
+  {
+    Sound& sound = soundState->playingSounds[soundIdx];
+    SM_ASSERT(sound.size > 0, "Sound has no Samples Size: %d", sound.size);
+    SM_ASSERT(sound.data, "Sound has no Data!");
+
+    // Playing Sounds
+    if(sound.options & SOUND_OPTION_START ||
+       sound.options & SOUND_OPTION_FADE_IN)
+    {
+      xAudioVoice* voice = nullptr;
+      for(int voiceIdx = 0; voiceIdx < MAX_CONCURRENT_SOUNDS; voiceIdx++)
+      {
+        xAudioVoice* possibleVoice = &voiceArr[voiceIdx];
+        if(!possibleVoice->playing)
+        {
+          voice = possibleVoice;
+          break;
+        }
+      }
+
+      if(voice != nullptr) 
+      { 
+        XAUDIO2_BUFFER buffer = {};
+        buffer.Flags = XAUDIO2_END_OF_STREAM;
+        buffer.AudioBytes = sound.size;
+        buffer.pAudioData = (BYTE*)sound.data;
+        buffer.LoopCount = sound.options & SOUND_OPTION_LOOP? XAUDIO2_MAX_LOOP_COUNT: 0;
+
+        HRESULT hr = voice->voice->SubmitSourceBuffer(&buffer);
+        if(!FAILED(hr)) 
+        {
+          voice->voice->Start();
+          voice->soundPath = sound.file;
+          voice->options = sound.options;
+		      InterlockedExchange((LONG*)&voice->playing, true);
+        }
+      }
+    }
+
+    // Stopping Sounds
+    if(sound.options & SOUND_OPTION_FADE_OUT)
+    {
+      xAudioVoice* voice = nullptr;
+      for(int voiceIdx = 0; voiceIdx < MAX_CONCURRENT_SOUNDS; voiceIdx++)
+      {
+        xAudioVoice* possibleVoice = &voiceArr[voiceIdx];
+        if(!possibleVoice->playing)
+        {
+          continue;
+        }
+
+        if(strcmp(possibleVoice->soundPath, sound.file) == 0)
+        {
+          possibleVoice->options = SOUND_OPTION_FADE_OUT;
+        }
+      }
+    }
+  }
+
+  // Update Voices 
+  for(int voiceIdx = 0; voiceIdx < MAX_CONCURRENT_SOUNDS; voiceIdx++)
+  {
+    xAudioVoice* voice = &voiceArr[voiceIdx];
+
+    if(voice->options & SOUND_OPTION_FADE_IN)
+    {
+      voice->fadeTimer = min(voice->fadeTimer + dt, FADE_DURATION);
+      float t = voice->fadeTimer / FADE_DURATION;
+      voice->voice->SetVolume(t * musicVolume);
+
+      if(voice->fadeTimer == FADE_DURATION)
+      {
+        voice->options ^= SOUND_OPTION_FADE_IN;
+        voice->fadeTimer = 0.0f;
+      }
+
+      // If some clown sets both options, SOUND_OPTION_FADE_IN will start
+      // then SOUND_OPTION_FADE_OUT will happen
+      continue;
+    }
+
+    if(voice->options & SOUND_OPTION_FADE_OUT)
+    {
+      voice->fadeTimer = min(voice->fadeTimer + dt, FADE_DURATION);
+      float t = 1.0f - voice->fadeTimer / FADE_DURATION;
+      voice->voice->SetVolume(t * musicVolume);
+
+      if(voice->fadeTimer == FADE_DURATION)
+      {
+        voice->options ^= SOUND_OPTION_FADE_OUT;
+        voice->voice->Stop();
+        voice->voice->FlushSourceBuffers(); // Remove the buffer from the voice
+        voice->voice->SetVolume(1.0f); // Reset Volume
+        voice->fadeTimer = 0.0f;
+      }
+    }
+  }
+
+  soundState->playingSounds.count = 0;
 }

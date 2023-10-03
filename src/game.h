@@ -2,6 +2,7 @@
 
 #include "input.h"
 #include "schnitzel_lib.h"
+#include "sound.h"
 #include "render_interface.h"
 
 // #############################################################################
@@ -87,5 +88,6 @@ extern "C"
   EXPORT_FN void update_game(GameState* gameStateIn, 
                              RenderData* renderDataIn, 
                              Input* inputIn, 
+                             SoundState* soundStateIn,
                              float dt);
 }
