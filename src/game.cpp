@@ -99,6 +99,7 @@ void simulate()
   {
     Player& player = gameState->player;
     player.prevPos = player.pos;
+    player.animationState = PLAYER_ANIM_IDLE;
 
     static Vec2 remainder = {};
     static bool grounded = false;
@@ -110,6 +111,16 @@ void simulate()
     constexpr float fallSpeed = 3.6f;
     constexpr float jumpSpeed = -3.0f;
 
+    // Facing the Player in the right direction
+    if(player.speed.x > 0)
+    {
+      player.renderOptions = 0;
+    }
+    if(player.speed.x < 0)
+    {
+      player.renderOptions = RENDER_OPTION_FLIP_X;
+    }
+
     // Jump
     if(just_pressed(JUMP) && grounded)
     {
@@ -120,23 +131,40 @@ void simulate()
       grounded = false;
     }
 
+    if(!grounded)
+    {
+      player.animationState = PLAYER_ANIM_JUMP;
+    }
+
     if(is_down(MOVE_LEFT))
     {
+      if(grounded)
+      {
+        player.animationState = PLAYER_ANIM_RUN;
+      }
+
       float mult = 1.0f;
       if(player.speed.x > 0.0f)
       {
         mult = 3.0f;
       }
+      player.runAnimTime += dt;
       player.speed.x = approach(player.speed.x, -runSpeed, runAcceleration * mult * dt);
     }
 
     if(is_down(MOVE_RIGHT))
     {
+      if(grounded)
+      {
+        player.animationState = PLAYER_ANIM_RUN;
+      }
+
       float mult = 1.0f;
       if(player.speed.x < 0.0f)
       {
         mult = 3.0f;
       }
+      player.runAnimTime += dt;
       player.speed.x = approach(player.speed.x, runSpeed, runAcceleration * mult * dt);
     }
 
@@ -585,9 +613,17 @@ EXPORT_FN void update_game(GameState* gameStateIn,
 
   if(!gameState->initialized)
   {
-    play_sound("First Steps", SOUND_OPTION_LOOP);
+    // play_sound("First Steps", SOUND_OPTION_LOOP);
     renderData->gameCamera.dimensions = {WORLD_WIDTH, WORLD_HEIGHT};
     gameState->initialized = true;
+
+    // Player
+    {
+      Player& player = gameState->player;
+      player.animationSprites[PLAYER_ANIM_IDLE] = SPRITE_CELESTE;
+      player.animationSprites[PLAYER_ANIM_JUMP] = SPRITE_CELESTE_JUMP;
+      player.animationSprites[PLAYER_ANIM_RUN] = SPRITE_CELESTE_RUN;
+    }
 
     // Tileset
     {
@@ -683,7 +719,14 @@ EXPORT_FN void update_game(GameState* gameStateIn,
   {
     Player& player = gameState->player;
     IVec2 playerPos = lerp(player.prevPos, player.pos, interpolatedDT);
-    draw_sprite(SPRITE_CELESTE, playerPos);
+    
+    Sprite sprite = get_sprite(player.animationSprites[player.animationState]);
+    int animationIdx = animate(&player.runAnimTime, sprite.frameCount, 0.6f);
+    draw_sprite(player.animationSprites[player.animationState], playerPos, 
+                {
+                  .animationIdx = animationIdx,
+                  .renderOptions = player.renderOptions
+                });
   }
 
   // Drawing Tileset

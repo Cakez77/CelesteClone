@@ -1,5 +1,10 @@
 #version 430 core
 
+#define BIT(x) 1 << x
+
+int RENDER_OPTION_FLIP_X = BIT(0);
+int RENDER_OPTION_FLIP_Y = BIT(1);
+
 // Structs
 struct Transform 
 {
@@ -7,6 +12,8 @@ struct Transform
   vec2 size;
   ivec2 atlasOffset;
   ivec2 spriteSize;
+  int animationIdx;
+  int renderOptions;
 };
 
 // Input
@@ -41,10 +48,24 @@ void main()
     transform.pos + transform.size                        // Bottom Right
   };
 
-  float left = transform.atlasOffset.x;
-  float top = transform.atlasOffset.y;
-  float right = transform.atlasOffset.x + transform.spriteSize.x;
-  float bottom = transform.atlasOffset.y + transform.spriteSize.y;
+  int left = transform.atlasOffset.x;
+  int top = transform.atlasOffset.y;
+  int right = transform.atlasOffset.x + transform.spriteSize.x;
+  int bottom = transform.atlasOffset.y + transform.spriteSize.y;
+
+  if(bool(transform.renderOptions & RENDER_OPTION_FLIP_X))
+  {
+    int tmp = left;
+    left = right;
+    right = tmp;
+  }
+
+  if(bool(transform.renderOptions & RENDER_OPTION_FLIP_Y))
+  {
+    int tmp = top;
+    top = bottom;
+    bottom = tmp;
+  }
 
   vec2 textureCoords[6] = 
   {

@@ -43,12 +43,25 @@ struct Tile
   bool isVisible;
 }; 
 
+enum PlayerAnimState
+{
+  PLAYER_ANIM_IDLE,
+  PLAYER_ANIM_RUN,
+  PLAYER_ANIM_JUMP,
+
+  PLAYER_ANIM_COUNT
+};
+
 struct Player
 {
   IVec2 pos;
   IVec2 prevPos;
   Vec2 speed;
   Vec2 solidSpeed;
+  int renderOptions;
+  float runAnimTime;
+  PlayerAnimState animationState;
+  SpriteID animationSprites[PLAYER_ANIM_COUNT];
 };
 
 struct Solid

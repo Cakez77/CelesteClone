@@ -7,6 +7,8 @@
 // #############################################################################
 //                           Renderer Constants
 // #############################################################################
+int RENDER_OPTION_FLIP_X = BIT(0);
+int RENDER_OPTION_FLIP_Y = BIT(1);
 
 // #############################################################################
 //                           Renderer Structs
@@ -18,12 +20,20 @@ struct OrthographicCamera2D
   Vec2 position;
 };
 
+struct DrawData
+{
+  int animationIdx;
+  int renderOptions;
+};
+
 struct Transform 
 {
   Vec2 pos;
   Vec2 size;
   IVec2 atlasOffset;
   IVec2 spriteSize;
+  int animationIdx;
+  int renderOptions;
 };
 
 struct RenderData
@@ -63,6 +73,24 @@ IVec2 screen_to_world(IVec2 screenPos)
   return {xPos, yPos};
 }
 
+int animate(float* time, int frameCount, float duration = 1.0f)
+{
+  while(*time > duration)
+  {
+    *time -= duration;
+  }
+  
+  int animationIdx = (int)((*time / duration) * frameCount);
+  
+  // Clamp
+  if (animationIdx >= frameCount)
+  {
+    animationIdx = frameCount - 1;
+  }
+  
+  return animationIdx;
+}
+
 // #############################################################################
 //                           Renderer Functions
 // #############################################################################
@@ -82,20 +110,24 @@ void draw_quad(Vec2 pos, Vec2 size)
   renderData->transforms.add(transform);
 }
 
-void draw_sprite(SpriteID spriteID, Vec2 pos)
+void draw_sprite(SpriteID spriteID, Vec2 pos, DrawData drawData = {})
 {
   Sprite sprite = get_sprite(spriteID);
+  // For Anmations, this is a multiple of the sprites size,
+  // based on the animationIdx
+  sprite.atlasOffset.x += drawData.animationIdx * sprite.size.x;
 
   Transform transform = {};
   transform.pos = pos - vec_2(sprite.size) / 2.0f;
   transform.size = vec_2(sprite.size);
   transform.atlasOffset = sprite.atlasOffset;
   transform.spriteSize = sprite.size;
+  transform.renderOptions = drawData.renderOptions;
 
   renderData->transforms.add(transform);
 }
 
-void draw_sprite(SpriteID spriteID, IVec2 pos)
+void draw_sprite(SpriteID spriteID, IVec2 pos, DrawData drawData = {})
 {
-  draw_sprite(spriteID, vec_2(pos));
+  draw_sprite(spriteID, vec_2(pos), drawData);
 }
