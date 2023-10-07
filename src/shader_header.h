@@ -19,6 +19,7 @@
 // #############################################################################
 int RENDERING_OPTION_FLIP_X = BIT(0);
 int RENDERING_OPTION_FLIP_Y = BIT(1);
+int RENDERING_OPTION_FONT = BIT(2);
 
 // #############################################################################
 //                           Rendering Structs
@@ -30,5 +31,19 @@ struct Transform
   ivec2 atlasOffset;
   ivec2 spriteSize;
   int renderOptions;
-  float layer;
+  int materialIdx;
+};
+
+struct Material
+{
+	// Operator inside the Engine to compare materials
+#ifdef ENGINE 
+  vec4 color = COLOR_WHITE;
+	bool operator==(Material other)
+	{
+		return color == other.color;
+	}
+#else
+  vec4 color;
+#endif
 };

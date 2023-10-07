@@ -1,5 +1,12 @@
 
 // Input
+
+// Output
+layout (location = 0) out vec2 textureCoordsOut;
+layout (location = 1) out int renderOptions;
+layout (location = 2) out int materialIdx;
+
+// Buffers
 layout (std430, binding = 0) buffer TransformSBO
 {
   Transform transforms[];
@@ -8,8 +15,6 @@ layout (std430, binding = 0) buffer TransformSBO
 uniform vec2 screenSize;
 uniform mat4 orthoProjection;
 
-// Output
-layout (location = 0) out vec2 textureCoordsOut;
 
 void main()
 {
@@ -69,6 +74,8 @@ void main()
   }
 
   textureCoordsOut = textureCoords[gl_VertexID];
+  renderOptions = transform.renderOptions;
+  materialIdx = transform.materialIdx;
 }
 
 

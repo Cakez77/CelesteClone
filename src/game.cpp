@@ -615,7 +615,12 @@ EXPORT_FN void update_game(GameState* gameStateIn,
   {
     // play_sound("First Steps", SOUND_OPTION_LOOP);
     renderData->gameCamera.dimensions = {WORLD_WIDTH, WORLD_HEIGHT};
-    gameState->initialized = true;
+    renderData->gameCamera.position.x = 160;
+    renderData->gameCamera.position.y = -90;
+
+    renderData->uiCamera.dimensions = {WORLD_WIDTH, WORLD_HEIGHT};
+    renderData->uiCamera.position.x = 160;
+    renderData->uiCamera.position.y = -90;
 
     // Player
     {
@@ -656,9 +661,6 @@ EXPORT_FN void update_game(GameState* gameStateIn,
       gameState->keyMappings[JUMP].keys.add(KEY_SPACE);
     }
 
-    renderData->gameCamera.position.x = 160;
-    renderData->gameCamera.position.y = -90;
-
     // Solids
     {
       Solid solid = {};
@@ -677,6 +679,8 @@ EXPORT_FN void update_game(GameState* gameStateIn,
       solid.speed.y = 50.0f;
       gameState->solids.add(solid);
     }
+
+    gameState->initialized = true;
   }
 
   // Fixed Update Loop
@@ -704,6 +708,8 @@ EXPORT_FN void update_game(GameState* gameStateIn,
   }
 
   float interpolatedDT = (float)(gameState->updateTimer / UPDATE_DELAY);
+
+  draw_ui_text("Subscribe\nLike\nAnd Comment!", {0, 20}, {.material{.color = COLOR_BLUE}, .fontSize = 2.0f});
 
   // Draw Solids
   {

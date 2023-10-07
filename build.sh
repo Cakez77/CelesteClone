@@ -3,7 +3,7 @@
 timestamp=$(date +%s)
 
 defines="-DENGINE"
-libs="-luser32 -lopengl32 -lgdi32 -lole32"
+libs="-luser32 -lopengl32 -lgdi32 -lole32 -Lthird_party/lib -lfreetype.lib"
 warnings="-Wno-writable-strings -Wno-format-security -Wno-deprecated-declarations -Wno-switch"
 includes="-Ithird_party -Ithird_party/Include"
 
