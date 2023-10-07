@@ -1,20 +1,3 @@
-#version 430 core
-
-#define BIT(x) 1 << x
-
-int RENDER_OPTION_FLIP_X = BIT(0);
-int RENDER_OPTION_FLIP_Y = BIT(1);
-
-// Structs
-struct Transform 
-{
-  vec2 pos;
-  vec2 size;
-  ivec2 atlasOffset;
-  ivec2 spriteSize;
-  int animationIdx;
-  int renderOptions;
-};
 
 // Input
 layout (std430, binding = 0) buffer TransformSBO
@@ -53,14 +36,14 @@ void main()
   int right = transform.atlasOffset.x + transform.spriteSize.x;
   int bottom = transform.atlasOffset.y + transform.spriteSize.y;
 
-  if(bool(transform.renderOptions & RENDER_OPTION_FLIP_X))
+  if(bool(transform.renderOptions & RENDERING_OPTION_FLIP_X))
   {
     int tmp = left;
     left = right;
     right = tmp;
   }
 
-  if(bool(transform.renderOptions & RENDER_OPTION_FLIP_Y))
+  if(bool(transform.renderOptions & RENDERING_OPTION_FLIP_Y))
   {
     int tmp = top;
     top = bottom;

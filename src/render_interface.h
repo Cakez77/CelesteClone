@@ -1,6 +1,7 @@
 #pragma once
 
 #include "assets.h"
+#include "shader_header.h"
 #include "schnitzel_lib.h"
 
 
@@ -22,16 +23,6 @@ struct OrthographicCamera2D
 
 struct DrawData
 {
-  int animationIdx;
-  int renderOptions;
-};
-
-struct Transform 
-{
-  Vec2 pos;
-  Vec2 size;
-  IVec2 atlasOffset;
-  IVec2 spriteSize;
   int animationIdx;
   int renderOptions;
 };

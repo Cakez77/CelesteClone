@@ -1,4 +1,3 @@
-#version 430 core
 
 // Input
 layout (location = 0) in vec2 textureCoordsIn;
