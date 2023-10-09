@@ -17,7 +17,9 @@ enum SpriteID
   SPRITE_CELESTE_RUN,
   SPRITE_CELESTE_JUMP,
   SPRITE_SOLID_01,
-  SPRITE_SOLID_02,
+  SPRITE_SOLID_02,  
+  SPRITE_BUTTON_PLAY,
+  SPRITE_BUTTON_SAVE,
 
   SPRITE_COUNT
 };
@@ -86,6 +88,20 @@ Sprite get_sprite(SpriteID spriteID)
     {
       sprite.atlasOffset = {32, 16};
       sprite.size = {16, 13};
+      break;
+    }
+
+    case SPRITE_BUTTON_PLAY:
+    {
+      sprite.atlasOffset = {80, 0};
+      sprite.size = {32, 16};
+      break;
+    }
+
+    case SPRITE_BUTTON_SAVE:
+    {
+      sprite.atlasOffset = {80, 16};
+      sprite.size = {32, 16};
       break;
     }
   }

@@ -4,11 +4,12 @@
 #include "schnitzel_lib.h"
 #include "sound.h"
 #include "render_interface.h"
+#include "ui.h"
 
 // #############################################################################
 //                           Game Globals
 // #############################################################################
-constexpr int UPDATES_PER_SECOND = 60;
+constexpr int UPDATES_PER_SECOND = 30;
 constexpr double UPDATE_DELAY = 1.0 / UPDATES_PER_SECOND;
 constexpr int WORLD_WIDTH = 320;
 constexpr int WORLD_HEIGHT = 180;
@@ -102,5 +103,6 @@ extern "C"
                              RenderData* renderDataIn, 
                              Input* inputIn, 
                              SoundState* soundStateIn,
+                             UIState* uiStateIn,
                              float dt);
 }

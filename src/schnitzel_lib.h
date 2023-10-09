@@ -35,6 +35,7 @@ constexpr int SAMPLE_RATE = 44100;
 #define EXPORT_FN
 #endif
 
+#define line_id(index) (size_t)((__LINE__ << 16) | (index))
 #define ArraySize(x) (sizeof((x)) / sizeof((x)[0]))
 
 #define b8 char
@@ -592,6 +593,11 @@ bool point_in_rect(Vec2 point, IRect rect)
           point.x <= rect.pos.x + rect.size.x &&
           point.y >= rect.pos.y &&
           point.y <= rect.pos.y + rect.size.y);
+}
+
+bool point_in_rect(IVec2 point, IRect rect)
+{
+  return point_in_rect(vec_2(point), rect);
 }
 
 bool rect_collision(IRect a, IRect b)

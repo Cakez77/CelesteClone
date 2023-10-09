@@ -6,6 +6,8 @@
 
 #include "sound.h"
 
+#include "ui.h"
+
 #define APIENTRY
 #define GL_GLEXT_PROTOTYPES
 #include "glcorearb.h"
@@ -64,6 +66,13 @@ int main()
     return -1;
   }
 
+  uiState = (UIState*)bump_alloc(&persistentStorage, sizeof(UIState));
+  if(!uiState)
+  {
+    SM_ERROR("Failed to allocate UIState")
+    return -1;
+  }
+
   soundState = (SoundState*)bump_alloc(&persistentStorage, sizeof(SoundState));
   if(!soundState)
   {
@@ -97,7 +106,7 @@ int main()
 
     // Update
     platform_update_window();
-    update_game(gameState, renderData, input, soundState, dt);
+    update_game(gameState, renderData, input, soundState, uiState, dt);
     gl_render(&transientStorage);
     platform_update_audio(dt);
 
@@ -113,9 +122,10 @@ void update_game(GameState* gameStateIn,
                 RenderData* renderDataIn, 
                 Input* inputIn,
                 SoundState* soundStateIn,
+                UIState* uiStateIn,
                 float dt)
 {
-  update_game_ptr(gameStateIn ,renderDataIn, inputIn, soundStateIn, dt);
+  update_game_ptr(gameStateIn ,renderDataIn, inputIn, soundStateIn, uiStateIn, dt);
 }
 
 double get_delta_time()

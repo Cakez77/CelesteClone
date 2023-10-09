@@ -95,6 +95,21 @@ void simulate()
 {
   float dt = UPDATE_DELAY;
 
+  int buttonID = line_id(1);
+  Vec4 color = COLOR_WHITE;
+
+  if(is_hot(buttonID))
+  {
+    color = COLOR_GREEN;
+  }
+
+  if(do_button(SPRITE_BUTTON_PLAY, IVec2{WORLD_WIDTH/2, WORLD_HEIGHT/2}, buttonID, {.material{.color = color}}))
+  {
+    SM_TRACE("click");
+  }
+
+  do_ui_text("Subscribe\nLike\nAnd Comment!", {0, 20}, {.material{.color = COLOR_BLUE}, .fontSize = 2.0f});
+
   // Update Player
   {
     Player& player = gameState->player;
@@ -498,7 +513,7 @@ void simulate()
   }
 
   bool updateTiles = false;
-  if(is_down(MOUSE_LEFT))
+  if(is_down(MOUSE_LEFT) && !ui_is_hot() && !ui_is_active())
   {
     IVec2 worldPos = screen_to_world(input->mousePos);
     IVec2 mousePosWorld = input->mousePosWorld;
@@ -601,6 +616,7 @@ EXPORT_FN void update_game(GameState* gameStateIn,
                            RenderData* renderDataIn, 
                            Input* inputIn, 
                            SoundState* soundStateIn,
+                           UIState* uiStateIn,
                            float dt)
 {
   if(renderData != renderDataIn)
@@ -609,6 +625,7 @@ EXPORT_FN void update_game(GameState* gameStateIn,
     renderData = renderDataIn;
     input = inputIn;
     soundState = soundStateIn;
+    uiState = uiStateIn;
   }
 
   if(!gameState->initialized)
@@ -689,6 +706,7 @@ EXPORT_FN void update_game(GameState* gameStateIn,
     while(gameState->updateTimer >= UPDATE_DELAY)
     {
       gameState->updateTimer -= UPDATE_DELAY;
+      update_ui();
       simulate();
 
       // Relative Mouse here, because more frames than simulations
@@ -709,7 +727,20 @@ EXPORT_FN void update_game(GameState* gameStateIn,
 
   float interpolatedDT = (float)(gameState->updateTimer / UPDATE_DELAY);
 
-  draw_ui_text("Subscribe\nLike\nAnd Comment!", {0, 20}, {.material{.color = COLOR_BLUE}, .fontSize = 2.0f});
+  // Draw UI
+  {
+    for(int uiElementIdx = 0; uiElementIdx < uiState->uiElements.count; uiElementIdx++)
+    {
+      UIElement& uiElement = uiState->uiElements[uiElementIdx];
+      draw_sprite(uiElement.spriteID, uiElement.pos, uiElement.drawData);
+    }
+
+    for(int uiTextIdx = 0; uiTextIdx < uiState->uiTexts.count; uiTextIdx++)
+    {
+      UIText& uiText = uiState->uiTexts[uiTextIdx];
+      draw_ui_text(uiText.text, uiText.pos, uiText.textData);
+    }
+  }
 
   // Draw Solids
   {
@@ -751,6 +782,7 @@ EXPORT_FN void update_game(GameState* gameStateIn,
                 // Draw Tile
         Transform transform = {};
         // Draw the Tile around the center
+        transform.materialIdx = get_material_idx({.color  = COLOR_WHITE});
         transform.pos = {x * (float)TILESIZE, y * (float)TILESIZE};
         transform.size = {8, 8};
         transform.spriteSize = {8, 8};
