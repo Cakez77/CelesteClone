@@ -9,7 +9,7 @@
 // #############################################################################
 //                           Game Globals
 // #############################################################################
-constexpr int UPDATES_PER_SECOND = 30;
+constexpr int UPDATES_PER_SECOND = 60;
 constexpr double UPDATE_DELAY = 1.0 / UPDATES_PER_SECOND;
 constexpr int WORLD_WIDTH = 320;
 constexpr int WORLD_HEIGHT = 180;

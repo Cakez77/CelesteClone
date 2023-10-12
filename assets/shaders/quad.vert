@@ -3,8 +3,8 @@
 
 // Output
 layout (location = 0) out vec2 textureCoordsOut;
-layout (location = 1) out int renderOptions;
-layout (location = 2) out int materialIdx;
+layout (location = 1) out flat int renderOptions;
+layout (location = 2) out flat int materialIdx;
 
 // Buffers
 layout (std430, binding = 0) buffer TransformSBO

@@ -4,7 +4,14 @@
         {
             "label": "Build",
             "type": "shell",
-            "command": "sh build.sh",
+            "windows":
+            {
+                "command": "sh build.sh"
+            },
+            "linux":
+            {
+                "command": "./build.sh",
+            },
             "group": {
                 "kind": "build",
                 "isDefault": true

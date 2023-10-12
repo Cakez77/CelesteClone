@@ -2,7 +2,15 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Launch",
+      "name": "Linux Launch",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/schnitzel",
+      "args": [],
+      "cwd": "${workspaceFolder}",
+    },
+    {
+      "name": "Windows Launch",
       "type": "cppvsdbg",
       "request": "launch",
       "program": "${workspaceFolder}/schnitzel",

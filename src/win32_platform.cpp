@@ -381,7 +381,7 @@ void platform_set_vsync(bool vSync)
   wglSwapIntervalEXT_ptr(vSync);
 }
 
-void* platform_load_dynamic_library(char* dll)
+void* platform_load_dynamic_library(const char* dll)
 {
   HMODULE result = LoadLibraryA(dll);
   SM_ASSERT(result, "Failed to load dll: %s", dll);
@@ -389,7 +389,7 @@ void* platform_load_dynamic_library(char* dll)
   return result;
 }
 
-void* platform_load_dynamic_function(void* dll, char* funName)
+void* platform_load_dynamic_function(void* dll, const char* funName)
 {
   FARPROC proc = GetProcAddress((HMODULE)dll, funName);
   SM_ASSERT(proc, "Failed to load function: %s from DLL", funName);
@@ -653,4 +653,9 @@ void platform_update_audio(float dt)
   }
 
   soundState->playingSounds.count = 0;
+}
+
+void platorm_sleep(unsigned int ms)
+{
+  Sleep(ms);
 }

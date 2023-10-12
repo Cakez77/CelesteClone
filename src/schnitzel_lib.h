@@ -212,7 +212,7 @@ long long get_timestamp(const char* file)
   return file_stat.st_mtime;
 }
 
-bool file_exists(char* filePath)
+bool file_exists(const char* filePath)
 {
   SM_ASSERT(filePath, "No filePath supplied!");
 
@@ -226,7 +226,7 @@ bool file_exists(char* filePath)
   return true;
 }
 
-long get_file_size(char* filePath)
+long get_file_size(const char* filePath)
 {
   SM_ASSERT(filePath, "No filePath supplied!");
 
@@ -251,7 +251,7 @@ long get_file_size(char* filePath)
 * memory and therefore want more control over where it 
 * is allocated
 */
-char* read_file(char* filePath, int* fileSize, char* buffer)
+char* read_file(const char* filePath, int* fileSize, char* buffer)
 {
   SM_ASSERT(filePath, "No filePath supplied!");
   SM_ASSERT(fileSize, "No fileSize supplied!");
@@ -277,7 +277,7 @@ char* read_file(char* filePath, int* fileSize, char* buffer)
   return buffer;
 }
 
-char* read_file(char* filePath, int* fileSize, BumpAllocator* bumpAllocator)
+char* read_file(const char* filePath, int* fileSize, BumpAllocator* bumpAllocator)
 {
   char* file = nullptr;
   long fileSize2 = get_file_size(filePath);
@@ -292,7 +292,7 @@ char* read_file(char* filePath, int* fileSize, BumpAllocator* bumpAllocator)
   return file; 
 }
 
-void write_file(char* filePath, char* buffer, int size)
+void write_file(const char* filePath, char* buffer, int size)
 {
   SM_ASSERT(filePath, "No filePath supplied!");
   SM_ASSERT(buffer, "No buffer supplied!");
@@ -307,7 +307,7 @@ void write_file(char* filePath, char* buffer, int size)
   fclose(file);
 }
 
-bool copy_file(char* fileName, char* outputName, char* buffer)
+bool copy_file(const char* fileName, const char* outputName, char* buffer)
 {
   int fileSize = 0;
   char* data = read_file(fileName, &fileSize, buffer);
@@ -331,7 +331,7 @@ bool copy_file(char* fileName, char* outputName, char* buffer)
   return true;
 }
 
-bool copy_file(char* fileName, char* outputName, BumpAllocator* bumpAllocator)
+bool copy_file(const char* fileName, const char* outputName, BumpAllocator* bumpAllocator)
 {
   char* file = 0;
   long fileSize2 = get_file_size(fileName);

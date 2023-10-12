@@ -70,7 +70,7 @@ void play_sound(char* soundName, SoundOptions options = 0)
 
 	Sound sound = {};
 	sound.options = options;
-	sprintf_s(sound.file, ArraySize(sound.file), "assets/sounds/%s.wav", soundName);
+	sprintf(sound.file, "assets/sounds/%s.wav", soundName);
 
 	// Look for existing Sound to play
 	for(int soundIdx = 0; soundIdx < soundState->allocatedSounds.count; soundIdx++)
