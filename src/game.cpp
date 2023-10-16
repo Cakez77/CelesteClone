@@ -1,6 +1,7 @@
 #include "game.h"
 
 #include "assets.h"
+#include "texts.h"
 
 // #############################################################################
 //                           Game Constants
@@ -91,24 +92,12 @@ IRect get_solid_rect(Solid solid)
   return {solid.pos - sprite.size / 2, sprite.size};
 }
 
-void simulate()
+void update_level(float dt)
 {
-  float dt = UPDATE_DELAY;
-
-  int buttonID = line_id(1);
-  Vec4 color = COLOR_WHITE;
-
-  if(is_hot(buttonID))
+  if(just_pressed(PAUSE))
   {
-    color = COLOR_GREEN;
+    gameState->state = GAME_STATE_MAIN_MENU;
   }
-
-  if(do_button(SPRITE_BUTTON_PLAY, IVec2{WORLD_WIDTH/2, WORLD_HEIGHT/2}, buttonID, {.material{.color = color}}))
-  {
-    SM_TRACE("click");
-  }
-
-  do_ui_text("Subscribe\nLike\nAnd Comment!", {0, 20}, {.material{.color = COLOR_BLUE}, .fontSize = 2.0f});
 
   // Update Player
   {
@@ -609,6 +598,57 @@ void simulate()
   }
 }
 
+void update_main_menu(float dt)
+{
+  int buttonID = line_id(1);
+  Vec4 color = COLOR_WHITE;
+
+  if(is_hot(buttonID))
+  {
+    color = COLOR_GREEN;
+  }
+
+  if(do_button(SPRITE_BUTTON_PLAY, IVec2{WORLD_WIDTH/2, WORLD_HEIGHT/2}, 
+               buttonID, {.material{.color = color}, .layer = get_layer(LAYER_UI, 10.0f)}))
+  {
+    gameState->state = GAME_STATE_IN_LEVEL;
+  }
+
+  do_ui_text(_(STRING_CELESTE_CLONE), {56, 20}, 
+             {.material{.color = COLOR_BLACK}, 
+             .fontSize = 2.0f, 
+             .layer = get_layer(LAYER_UI, 10)});
+
+  // Fullscreen White quad for the menu
+  do_ui_quad(
+    {(float)WORLD_WIDTH / 2, (float)WORLD_HEIGHT / 2},
+    {(float)WORLD_WIDTH, (float)WORLD_HEIGHT},
+    {      
+      .material{.color = {79.0f / 255.0f, 140.0f / 255.0f, 235.0f / 255.0f, 1.0f}},
+      .layer = get_layer(LAYER_UI, 0.0f)
+    });
+}
+
+void simulate()
+{
+  float dt = UPDATE_DELAY;
+
+  switch(gameState->state)
+  {
+    case GAME_STATE_IN_LEVEL:
+    {
+      update_level(dt);
+      break;
+    }
+  
+    case GAME_STATE_MAIN_MENU:
+    {
+      update_main_menu(dt);
+      break;
+    }
+  }
+}
+
 // #############################################################################
 //                           Game Functions(exposed)
 // #############################################################################
@@ -626,6 +666,8 @@ EXPORT_FN void update_game(GameState* gameStateIn,
     input = inputIn;
     soundState = soundStateIn;
     uiState = uiStateIn;
+
+    init_strings();
   }
 
   if(!gameState->initialized)
@@ -676,6 +718,7 @@ EXPORT_FN void update_game(GameState* gameStateIn,
       gameState->keyMappings[MOUSE_LEFT].keys.add(KEY_MOUSE_LEFT);
       gameState->keyMappings[MOUSE_RIGHT].keys.add(KEY_MOUSE_RIGHT);
       gameState->keyMappings[JUMP].keys.add(KEY_SPACE);
+      gameState->keyMappings[PAUSE].keys.add(KEY_ESCAPE);
     }
 
     // Solids
@@ -732,7 +775,7 @@ EXPORT_FN void update_game(GameState* gameStateIn,
     for(int uiElementIdx = 0; uiElementIdx < uiState->uiElements.count; uiElementIdx++)
     {
       UIElement& uiElement = uiState->uiElements[uiElementIdx];
-      draw_sprite(uiElement.spriteID, uiElement.pos, uiElement.drawData);
+      draw_ui_sprite(uiElement.spriteID, uiElement.pos, uiElement.size, uiElement.drawData);
     }
 
     for(int uiTextIdx = 0; uiTextIdx < uiState->uiTexts.count; uiTextIdx++)
@@ -748,7 +791,7 @@ EXPORT_FN void update_game(GameState* gameStateIn,
     {
       Solid& solid = gameState->solids[solidIdx];
       IVec2 solidPos = lerp(solid.prevPos, solid.pos, interpolatedDT);
-      draw_sprite(solid.spriteID, solidPos);
+      draw_sprite(solid.spriteID, solidPos, {.layer = get_layer(LAYER_GAME, 0)});
     }
   }
 
@@ -762,7 +805,8 @@ EXPORT_FN void update_game(GameState* gameStateIn,
     draw_sprite(player.animationSprites[player.animationState], playerPos, 
                 {
                   .animationIdx = animationIdx,
-                  .renderOptions = player.renderOptions
+                  .renderOptions = player.renderOptions,
+                  .layer = get_layer(LAYER_GAME, 0)
                 });
   }
 
@@ -787,6 +831,7 @@ EXPORT_FN void update_game(GameState* gameStateIn,
         transform.size = {8, 8};
         transform.spriteSize = {8, 8};
         transform.atlasOffset = gameState->tileCoords[tile->neighbourMask];
+        transform.layer = get_layer(LAYER_GAME, 0);
         draw_quad(transform);
       }
     }

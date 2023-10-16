@@ -21,4 +21,4 @@ bool platform_free_dynamic_library(void* dll);
 void platform_fill_keycode_lookup_table();
 bool platform_init_audio();
 void platform_update_audio(float dt);
-void platorm_sleep(unsigned int ms);
+void platform_sleep(unsigned int ms);

@@ -24,6 +24,7 @@ struct UIElement
 {
   SpriteID spriteID;
   Vec2 pos;
+  Vec2 size;
   DrawData drawData;
 };
 
@@ -149,7 +150,7 @@ bool do_button(SpriteID spriteID, IVec2 pos, int ID, DrawData drawData = {})
   return false;
 }
 
-void do_ui_text(char* text, Vec2 pos, TextData textData = {})
+void do_ui_text(const char* text, Vec2 pos, TextData textData = {})
 {
   SM_ASSERT(text, "No Text supplied!");
   SM_ASSERT(strlen(text) < MAX_TEXT_CHARS, "Text too long!");
@@ -164,8 +165,20 @@ void do_ui_text(char* text, Vec2 pos, TextData textData = {})
 }
 
 template <typename... Args>
-void do_format_ui_text(char* format, Vec2 pos, TextData textData = {}, Args... args)
+void do_format_ui_text(const char* format, Vec2 pos, TextData textData = {}, Args... args)
 {
   char* text = format_text(format, args...);
   do_ui_text(text, pos, textData);
+}
+
+void do_ui_quad(Vec2 pos, Vec2 size, DrawData drawData = {})
+{
+  UIElement uiElement = 
+  {
+    .spriteID = SPRITE_WHITE,
+    .pos = pos,
+    .size = size,
+    .drawData = drawData,
+  };
+  uiState->uiElements.add(uiElement);
 }

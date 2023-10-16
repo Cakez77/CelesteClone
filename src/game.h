@@ -30,6 +30,8 @@ enum GameInputType
   MOUSE_LEFT,
   MOUSE_RIGHT,
 
+  PAUSE,
+
   GAME_INPUT_COUNT
 };
 
@@ -76,8 +78,15 @@ struct Solid
   Array<IVec2, 2> keyframes;
 };
 
+enum GameStateID
+{
+  GAME_STATE_MAIN_MENU,
+  GAME_STATE_IN_LEVEL,
+};
+
 struct GameState
 {
+  GameStateID state;
   float updateTimer;
   bool initialized = false;
 

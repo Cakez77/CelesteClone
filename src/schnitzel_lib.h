@@ -432,6 +432,11 @@ struct Vec2
   {
     return {x - other.x, y - other.y};
   }
+
+  operator bool()
+  {
+    return x != 0.0f && y != 0.0f;
+  }
 };
 
 struct IVec2

@@ -13,7 +13,7 @@
       "name": "Windows Launch",
       "type": "cppvsdbg",
       "request": "launch",
-      "program": "${workspaceFolder}/schnitzel",
+      "program": "${workspaceFolder}/schnitzel.exe",
       "args": [],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal"
