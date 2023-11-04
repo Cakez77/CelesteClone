@@ -104,6 +104,12 @@ Sprite get_sprite(SpriteID spriteID)
       sprite.size = {32, 16};
       break;
     }
+
+    default:
+    {
+      SM_ERROR("Invalid SpriteID: %d", spriteID);
+      break;
+    }
   }
 
   return sprite;

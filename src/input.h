@@ -73,7 +73,7 @@ enum KeyCodeID
   KEY_NUMPAD_DOT,
   KEY_NUMPAD_SLASH,
   
-  KEY_COUNT = 255,
+  KEY_COUNT = 384,
 };
 
 struct Key

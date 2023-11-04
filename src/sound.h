@@ -5,10 +5,10 @@
 //                           Sound Constants
 // #############################################################################
 static constexpr int MAX_CONCURRENT_SOUNDS = 16;
-static constexpr int SOUNDS_BUFFER_SIZE = MB(128);
+static const int SOUNDS_BUFFER_SIZE = MB(128);
 static constexpr int MAX_SOUND_PATH_LENGTH = 256;
 
-static constexpr float FADE_DURATION = 1.0f;
+static const float FADE_DURATION = 1.0f;
 
 // #############################################################################
 //                           Sound Structs

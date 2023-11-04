@@ -12,6 +12,7 @@ layout (std430, binding = 0) buffer TransformSBO
   Transform transforms[];
 };
 
+
 uniform vec2 screenSize;
 uniform mat4 orthoProjection;
 
@@ -68,8 +69,6 @@ void main()
   // Normalize Position
   {
     vec2 vertexPos = vertices[gl_VertexID];
-    // vertexPos.y = -vertexPos.y + screenSize.y;
-    // vertexPos = 2.0 * (vertexPos / screenSize) - 1.0;
     gl_Position = orthoProjection * vec4(vertexPos, transform.layer, 1.0);
   }
 
@@ -77,7 +76,6 @@ void main()
   renderOptions = transform.renderOptions;
   materialIdx = transform.materialIdx;
 }
-
 
 
 

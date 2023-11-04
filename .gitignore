@@ -4,12 +4,23 @@
 *.exp
 *.obj
 *.dll
+*.so
 *.pdb
 *.nativecodeanalysis.xml
 *.lib
+schnitzel
 build
 .vs
 c_cpp_properties.json
 settings.json
 .clangd
+.clang-format
 !freetype.lib
+# macOS specific files and directories
+.DS_Store
+*.swp
+*.dSYM/
+*.dylib
+*.xcuserstate
+*.xcworkspace
+*.xcodeproj/

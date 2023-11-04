@@ -18,8 +18,8 @@
 //                           Constants
 // #############################################################################
 // WAV Files
-constexpr int NUM_CHANNELS = 2;
-constexpr int SAMPLE_RATE = 44100;
+const int NUM_CHANNELS = 2;
+const int SAMPLE_RATE = 44100;
 
 // #############################################################################
 //                           Defines
@@ -48,7 +48,7 @@ constexpr int SAMPLE_RATE = 44100;
 //                           Logging
 // #############################################################################
 enum TextColor
-{  
+{
   TEXT_COLOR_BLACK,
   TEXT_COLOR_RED,
   TEXT_COLOR_GREEN,
@@ -68,27 +68,25 @@ enum TextColor
   TEXT_COLOR_COUNT
 };
 
-template <typename ...Args>
-void _log(char* prefix, char* msg, TextColor textColor, Args... args)
+template <typename... Args> void _log(char* prefix, char* msg, TextColor textColor, Args... args)
 {
-  static char* TextColorTable[TEXT_COLOR_COUNT] = 
-  {    
-    "\x1b[30m", // TEXT_COLOR_BLACK
-    "\x1b[31m", // TEXT_COLOR_RED
-    "\x1b[32m", // TEXT_COLOR_GREEN
-    "\x1b[33m", // TEXT_COLOR_YELLOW
-    "\x1b[34m", // TEXT_COLOR_BLUE
-    "\x1b[35m", // TEXT_COLOR_MAGENTA
-    "\x1b[36m", // TEXT_COLOR_CYAN
-    "\x1b[37m", // TEXT_COLOR_WHITE
-    "\x1b[90m", // TEXT_COLOR_BRIGHT_BLACK
-    "\x1b[91m", // TEXT_COLOR_BRIGHT_RED
-    "\x1b[92m", // TEXT_COLOR_BRIGHT_GREEN
-    "\x1b[93m", // TEXT_COLOR_BRIGHT_YELLOW
-    "\x1b[94m", // TEXT_COLOR_BRIGHT_BLUE
-    "\x1b[95m", // TEXT_COLOR_BRIGHT_MAGENTA
-    "\x1b[96m", // TEXT_COLOR_BRIGHT_CYAN
-    "\x1b[97m", // TEXT_COLOR_BRIGHT_WHITE
+  static char* TextColorTable[TEXT_COLOR_COUNT] = {
+      "\x1b[30m", // TEXT_COLOR_BLACK
+      "\x1b[31m", // TEXT_COLOR_RED
+      "\x1b[32m", // TEXT_COLOR_GREEN
+      "\x1b[33m", // TEXT_COLOR_YELLOW
+      "\x1b[34m", // TEXT_COLOR_BLUE
+      "\x1b[35m", // TEXT_COLOR_MAGENTA
+      "\x1b[36m", // TEXT_COLOR_CYAN
+      "\x1b[37m", // TEXT_COLOR_WHITE
+      "\x1b[90m", // TEXT_COLOR_BRIGHT_BLACK
+      "\x1b[91m", // TEXT_COLOR_BRIGHT_RED
+      "\x1b[92m", // TEXT_COLOR_BRIGHT_GREEN
+      "\x1b[93m", // TEXT_COLOR_BRIGHT_YELLOW
+      "\x1b[94m", // TEXT_COLOR_BRIGHT_BLUE
+      "\x1b[95m", // TEXT_COLOR_BRIGHT_MAGENTA
+      "\x1b[96m", // TEXT_COLOR_BRIGHT_CYAN
+      "\x1b[97m", // TEXT_COLOR_BRIGHT_WHITE
   };
 
   char formatBuffer[8192] = {};
@@ -104,23 +102,22 @@ void _log(char* prefix, char* msg, TextColor textColor, Args... args)
 #define SM_WARN(msg, ...) _log("WARN: ", msg, TEXT_COLOR_YELLOW, ##__VA_ARGS__);
 #define SM_ERROR(msg, ...) _log("ERROR: ", msg, TEXT_COLOR_RED, ##__VA_ARGS__);
 
-#define SM_ASSERT(x, msg, ...)    \
-{                                 \
-  if(!(x))                        \
-  {                               \
-    SM_ERROR(msg, ##__VA_ARGS__); \
-    DEBUG_BREAK();                \
-    SM_ERROR("Assertion HIT!")    \
-  }                               \
-}
+#define SM_ASSERT(x, msg, ...)                                                                                         \
+  {                                                                                                                    \
+    if (!(x))                                                                                                          \
+    {                                                                                                                  \
+      SM_ERROR(msg, ##__VA_ARGS__);                                                                                    \
+      DEBUG_BREAK();                                                                                                   \
+      SM_ERROR("Assertion HIT!")                                                                                       \
+    }                                                                                                                  \
+  }
 
 // #############################################################################
 //                           Array
 // #############################################################################
-template<typename T, int N>
-struct Array
+template <typename T, int N> struct Array
 {
-  static constexpr int maxElements = N;
+  static const int maxElements = N;
   int count = 0;
   T elements[N];
 
@@ -169,9 +166,9 @@ struct BumpAllocator
 BumpAllocator make_bump_allocator(size_t size)
 {
   BumpAllocator ba = {};
-  
+
   ba.memory = (char*)malloc(size);
-  if(ba.memory)
+  if (ba.memory)
   {
     ba.capacity = size;
     memset(ba.memory, 0, size); // Sets the memory to 0
@@ -188,8 +185,8 @@ char* bump_alloc(BumpAllocator* bumpAllocator, size_t size)
 {
   char* result = nullptr;
 
-  size_t allignedSize = (size + 7) & ~ 7; // This makes sure the first 4 bits are 0 
-  if(bumpAllocator->used + allignedSize <= bumpAllocator->capacity)
+  size_t allignedSize = (size + 7) & ~7; // This makes sure the first 4 bits are 0
+  if (bumpAllocator->used + allignedSize <= bumpAllocator->capacity)
   {
     result = bumpAllocator->memory + bumpAllocator->used;
     bumpAllocator->used += allignedSize;
@@ -207,9 +204,9 @@ char* bump_alloc(BumpAllocator* bumpAllocator, size_t size)
 // #############################################################################
 long long get_timestamp(const char* file)
 {
-  struct stat file_stat = {};
-  stat(file, &file_stat);
-  return file_stat.st_mtime;
+  struct stat fileStat = {};
+  stat(file, &fileStat);
+  return fileStat.st_mtime;
 }
 
 bool file_exists(const char* filePath)
@@ -217,7 +214,7 @@ bool file_exists(const char* filePath)
   SM_ASSERT(filePath, "No filePath supplied!");
 
   auto file = fopen(filePath, "rb");
-  if(!file)
+  if (!file)
   {
     return false;
   }
@@ -232,7 +229,7 @@ long get_file_size(const char* filePath)
 
   long fileSize = 0;
   auto file = fopen(filePath, "rb");
-  if(!file)
+  if (!file)
   {
     SM_ERROR("Failed opening File: %s", filePath);
     return 0;
@@ -247,10 +244,10 @@ long get_file_size(const char* filePath)
 }
 
 /*
-* Reads a file into a supplied buffer. We manage our own
-* memory and therefore want more control over where it 
-* is allocated
-*/
+ * Reads a file into a supplied buffer. We manage our own
+ * memory and therefore want more control over where it
+ * is allocated
+ */
 char* read_file(const char* filePath, int* fileSize, char* buffer)
 {
   SM_ASSERT(filePath, "No filePath supplied!");
@@ -259,7 +256,7 @@ char* read_file(const char* filePath, int* fileSize, char* buffer)
 
   *fileSize = 0;
   auto file = fopen(filePath, "rb");
-  if(!file)
+  if (!file)
   {
     SM_ERROR("Failed opening File: %s", filePath);
     return nullptr;
@@ -282,14 +279,14 @@ char* read_file(const char* filePath, int* fileSize, BumpAllocator* bumpAllocato
   char* file = nullptr;
   long fileSize2 = get_file_size(filePath);
 
-  if(fileSize2)
+  if (fileSize2)
   {
     char* buffer = bump_alloc(bumpAllocator, fileSize2 + 1);
 
     file = read_file(filePath, fileSize, buffer);
   }
 
-  return file; 
+  return file;
 }
 
 void write_file(const char* filePath, char* buffer, int size)
@@ -297,7 +294,7 @@ void write_file(const char* filePath, char* buffer, int size)
   SM_ASSERT(filePath, "No filePath supplied!");
   SM_ASSERT(buffer, "No buffer supplied!");
   auto file = fopen(filePath, "wb");
-  if(!file)
+  if (!file)
   {
     SM_ERROR("Failed opening File: %s", filePath);
     return;
@@ -313,19 +310,19 @@ bool copy_file(const char* fileName, const char* outputName, char* buffer)
   char* data = read_file(fileName, &fileSize, buffer);
 
   auto outputFile = fopen(outputName, "wb");
-  if(!outputFile)
+  if (!outputFile)
   {
     SM_ERROR("Failed opening File: %s", outputName);
     return false;
   }
 
   int result = fwrite(data, sizeof(char), fileSize, outputFile);
-  if(!result)
+  if (!result)
   {
     SM_ERROR("Failed opening File: %s", outputName);
     return false;
   }
-  
+
   fclose(outputFile);
 
   return true;
@@ -336,7 +333,7 @@ bool copy_file(const char* fileName, const char* outputName, BumpAllocator* bump
   char* file = 0;
   long fileSize2 = get_file_size(fileName);
 
-  if(fileSize2)
+  if (fileSize2)
   {
     char* buffer = bump_alloc(bumpAllocator, fileSize2 + 1);
 
@@ -351,27 +348,32 @@ bool copy_file(const char* fileName, const char* outputName, BumpAllocator* bump
 // #############################################################################
 int sign(int x)
 {
-  return (x >= 0)? 1 : -1;
+  return (x >= 0) ? 1 : -1;
 }
 
 float sign(float x)
 {
-  return (x >= 0.0f)? 1.0f : -1.0f;
+  return (x >= 0.0f) ? 1.0f : -1.0f;
 }
 
 int min(int a, int b)
 {
-  return (a < b)? a : b;
+  return (a < b) ? a : b;
+}
+
+size_t min(size_t a, size_t b)
+{
+  return (a < b) ? a : b;
 }
 
 int max(int a, int b)
 {
-  return (a > b)? a : b;
+  return (a > b) ? a : b;
 }
 
 long long max(long long a, long long b)
 {
-  if(a > b)
+  if (a > b)
   {
     return a;
   }
@@ -381,7 +383,7 @@ long long max(long long a, long long b)
 
 float max(float a, float b)
 {
-  if(a > b)
+  if (a > b)
   {
     return a;
   }
@@ -391,7 +393,7 @@ float max(float a, float b)
 
 float min(float a, float b)
 {
-  if(a < b)
+  if (a < b)
   {
     return a;
   }
@@ -401,7 +403,7 @@ float min(float a, float b)
 
 float approach(float current, float target, float increase)
 {
-  if(current < target)
+  if (current < target)
   {
     return min(current + increase, target);
   }
@@ -451,14 +453,14 @@ struct IVec2
 
   IVec2& operator-=(int value)
   {
-    x -= value; 
+    x -= value;
     y -= value;
     return *this;
   }
 
   IVec2& operator+=(int value)
   {
-    x += value; 
+    x += value;
     y += value;
     return *this;
   }
@@ -502,7 +504,7 @@ struct Vec4
       float z;
       float w;
     };
-    
+
     struct
     {
       float r;
@@ -525,7 +527,7 @@ struct Vec4
 
 struct Mat4
 {
-  union 
+  union
   {
     Vec4 values[4];
     struct
@@ -544,7 +546,7 @@ struct Mat4
       float bz;
       float cz;
       float dz;
-      
+
       float aw;
       float bw;
       float cw;
@@ -565,7 +567,7 @@ Mat4 orthographic_projection(float left, float right, float top, float bottom)
   result.bw = (top + bottom) / (top - bottom);
   result.cw = 0.0f; // Near Plane
   result[0][0] = 2.0f / (right - left);
-  result[1][1] = 2.0f / (top - bottom); 
+  result[1][1] = 2.0f / (top - bottom);
   result[2][2] = 1.0f / (1.0f - 0.0f); // Far and Near
   result[3][3] = 1.0f;
 
@@ -586,17 +588,13 @@ struct IRect
 
 bool point_in_rect(Vec2 point, Rect rect)
 {
-  return (point.x >= rect.pos.x &&
-          point.x <= rect.pos.x + rect.size.x &&
-          point.y >= rect.pos.y &&
+  return (point.x >= rect.pos.x && point.x <= rect.pos.x + rect.size.x && point.y >= rect.pos.y &&
           point.y <= rect.pos.y + rect.size.y);
 }
 
 bool point_in_rect(Vec2 point, IRect rect)
 {
-  return (point.x >= rect.pos.x &&
-          point.x <= rect.pos.x + rect.size.x &&
-          point.y >= rect.pos.y &&
+  return (point.x >= rect.pos.x && point.x <= rect.pos.x + rect.size.x && point.y >= rect.pos.y &&
           point.y <= rect.pos.y + rect.size.y);
 }
 
@@ -607,18 +605,16 @@ bool point_in_rect(IVec2 point, IRect rect)
 
 bool rect_collision(IRect a, IRect b)
 {
-  return a.pos.x < b.pos.x  + b.size.x && // Collision on Left of a and right of b
-         a.pos.x + a.size.x > b.pos.x  && // Collision on Right of a and left of b
-         a.pos.y < b.pos.y  + b.size.y && // Collision on Bottom of a and Top of b
-         a.pos.y + a.size.y > b.pos.y;    // Collision on Top of a and Bottom of b
+  return a.pos.x < b.pos.x + b.size.x && // Collision on Left of a and right of b
+         a.pos.x + a.size.x > b.pos.x && // Collision on Right of a and left of b
+         a.pos.y < b.pos.y + b.size.y && // Collision on Bottom of a and Top of b
+         a.pos.y + a.size.y > b.pos.y;   // Collision on Top of a and Bottom of b
 }
-
-
 
 // #############################################################################
 //                           WAV File stuff
 // #############################################################################
-// Wave Files are seperated into chunks, 
+// Wave Files are seperated into chunks,
 // struct chunk
 // {
 //   unsigned int id;
@@ -631,76 +627,56 @@ bool rect_collision(IRect a, IRect b)
 struct WAVHeader
 {
   // Riff Chunk
-	unsigned int riffChunkId;
-	unsigned int riffChunkSize;
-	unsigned int format;
+  unsigned int riffChunkId;
+  unsigned int riffChunkSize;
+  unsigned int format;
 
   // Format Chunk
-	unsigned int formatChunkId;
-	unsigned int formatChunkSize;
-	unsigned short audioFormat;
-	unsigned short numChannels;
-	unsigned int sampleRate;
-	unsigned int byteRate;
-	unsigned short blockAlign;
-	unsigned short bitsPerSample;
+  unsigned int formatChunkId;
+  unsigned int formatChunkSize;
+  unsigned short audioFormat;
+  unsigned short numChannels;
+  unsigned int sampleRate;
+  unsigned int byteRate;
+  unsigned short blockAlign;
+  unsigned short bitsPerSample;
 
   // Data Chunk
-	unsigned char dataChunkId[4];
-	unsigned int dataChunkSize;
+  unsigned char dataChunkId[4];
+  unsigned int dataChunkSize;
 };
 
 struct WAVFile
 {
-	WAVHeader header;
-	char dataBegin;
+  WAVHeader header;
+  char dataBegin;
 };
 
 WAVFile* load_wav(char* path, BumpAllocator* bumpAllocator)
 {
-	int fileSize = 0;
-	WAVFile* wavFile = (WAVFile*)read_file(path, &fileSize, bumpAllocator);
-	if(!wavFile) 
-  { 
+  int fileSize = 0;
+  WAVFile* wavFile = (WAVFile*)read_file(path, &fileSize, bumpAllocator);
+  if (!wavFile)
+  {
     SM_ASSERT(0, "Failed to load Wave File: %s", path);
     return nullptr;
   }
 
-	SM_ASSERT(wavFile->header.numChannels == NUM_CHANNELS, 
-            "We only support 2 channels for now!");
-	SM_ASSERT(wavFile->header.sampleRate == SAMPLE_RATE, 
-            "We only support 44100 sample rate for now!");
+  SM_ASSERT(wavFile->header.numChannels == NUM_CHANNELS, "We only support 2 channels for now!");
+  SM_ASSERT(wavFile->header.sampleRate == SAMPLE_RATE, "We only support 44100 sample rate for now!");
 
-	SM_ASSERT(memcmp(&wavFile->header.dataChunkId, "data", 4) == 0, 
-						"WAV File not in propper format");
+  SM_ASSERT(memcmp(&wavFile->header.dataChunkId, "data", 4) == 0, "WAV File not in propper format");
 
-	return wavFile;
+  return wavFile;
 }
 
-//#######################################################################
-//                          Normal Colors
-//#######################################################################
-constexpr Vec4 COLOR_WHITE = {1.0f, 1.0f, 1.0f, 1.0f};
-constexpr Vec4 COLOR_RED = {1.0f, 0.0f, 0.0f, 1.0f};
-constexpr Vec4 COLOR_GREEN = {0.0f, 1.0f, 0.0f, 1.0f};
-constexpr Vec4 COLOR_BLUE = {0.0f, 0.0f, 1.0f, 1.0f};
-constexpr Vec4 COLOR_YELLOW = {1.0f, 1.0f, 0.0f, 1.0f};
-constexpr Vec4 COLOR_BLACK = {0.0f, 0.0f, 0.0f, 1.0};
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+// #######################################################################
+//                           Normal Colors
+// #######################################################################
+const Vec4 COLOR_WHITE = {1.0f, 1.0f, 1.0f, 1.0f};
+const Vec4 COLOR_RED = {1.0f, 0.0f, 0.0f, 1.0f};
+const Vec4 COLOR_GREEN = {0.0f, 1.0f, 0.0f, 1.0f};
+const Vec4 COLOR_BLUE = {0.0f, 0.0f, 1.0f, 1.0f};
+const Vec4 COLOR_YELLOW = {1.0f, 1.0f, 0.0f, 1.0f};
+const Vec4 COLOR_BLACK = {0.0f, 0.0f, 0.0f, 1.0};
+const Vec4 COLOR_SKY_BLUE = {79.0f / 255.0f, 140.0f / 255.0f, 235.0f / 255.0f, 1.0f};

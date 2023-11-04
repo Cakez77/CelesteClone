@@ -21,9 +21,10 @@
 const char* gameLibName = "game.dll";
 const char* gameLoadLibName = "game_load.dll";
 #elif defined(__APPLE__)
+#define LEGACY_OPENGL
 #include "mac_platform.cpp"
-const char* gameLibName = "game.so"; // ?????
-const char* gameLoadLibName = "game_load.so";
+const char* gameLibName = "game.dylib";
+const char* gameLoadLibName = "game_load.dylib";
 #else // Linux
 #include "linux_platform.cpp"
 const char* gameLibName = "game.so";

@@ -59,7 +59,10 @@ static PFNGLDELETESHADERPROC glDeleteShader_ptr;
 static PFNGLDRAWELEMENTSINSTANCEDPROC glDrawElementsInstanced_ptr;
 static PFNGLGENERATEMIPMAPPROC glGenerateMipmap_ptr;
 static PFNGLDEBUGMESSAGECALLBACKPROC glDebugMessageCallback_ptr;
-
+static PFNGLVERTEXATTRIBIPOINTERPROC glVertexAttribIPointer_ptr;
+static PFNGLTEXBUFFERPROC glTexBuffer_ptr;
+static PFNGLGETUNIFORMBLOCKINDEXPROC glGetUniformBlockIndex_ptr;
+static PFNGLUNIFORMBLOCKBINDINGPROC glUniformBlockBinding_ptr;
 
 void load_gl_functions()
 {
@@ -117,27 +120,36 @@ void load_gl_functions()
   glDrawElementsInstanced_ptr = (PFNGLDRAWELEMENTSINSTANCEDPROC) platform_load_gl_function("glDrawElementsInstanced");
   glGenerateMipmap_ptr = (PFNGLGENERATEMIPMAPPROC) platform_load_gl_function("glGenerateMipmap");
   glDebugMessageCallback_ptr = (PFNGLDEBUGMESSAGECALLBACKPROC)platform_load_gl_function("glDebugMessageCallback");
+  glVertexAttribIPointer_ptr = (PFNGLVERTEXATTRIBIPOINTERPROC)platform_load_gl_function("glVertexAttribIPointer");
+  glTexBuffer_ptr = (PFNGLTEXBUFFERPROC)platform_load_gl_function("glTexBuffer");
+  glGetUniformBlockIndex_ptr = (PFNGLGETUNIFORMBLOCKINDEXPROC)platform_load_gl_function("glGetUniformBlockIndex");
+  glUniformBlockBinding_ptr = (PFNGLUNIFORMBLOCKBINDINGPROC)platform_load_gl_function("glUniformBlockBinding");
 }
 
 // #############################################################################
 //                           OpenGL Function Wrappers
 // #############################################################################
-GLAPI GLuint APIENTRY glCreateProgram (void)
+GLAPI void APIENTRY glTexBuffer(GLenum target, GLenum internalformat, GLuint buffer) // Added this function
+{
+  glTexBuffer_ptr(target, internalformat, buffer);
+}
+
+GLAPI GLuint APIENTRY glCreateProgram(void)
 {
   return glCreateProgram_ptr();
 }
 
-GLAPI void APIENTRY glDeleteTextures (GLsizei n, const GLuint *textures)
+GLAPI void APIENTRY glDeleteTextures(GLsizei n, const GLuint* textures)
 {
   glDeleteTextures_ptr(n, textures);
 }
 
-GLAPI void APIENTRY glGenTextures (GLsizei n, GLuint *textures)
+GLAPI void APIENTRY glGenTextures(GLsizei n, GLuint* textures)
 {
   glGenTextures_ptr(n, textures);
 }
 
-GLAPI void APIENTRY glBindTexture (GLenum target, GLuint texture)
+GLAPI void APIENTRY glBindTexture(GLenum target, GLuint texture)
 {
   glBindTexture_ptr(target, texture);
 }
@@ -382,11 +394,25 @@ void glGenerateMipmap(GLenum target)
     glGenerateMipmap_ptr(target);
 }
 
-void glDebugMessageCallback (GLDEBUGPROC callback, const void *userParam)
+void glDebugMessageCallback(GLDEBUGPROC callback, const void* userParam)
 {
   glDebugMessageCallback_ptr(callback, userParam);
 }
 
+void glVertexAttribIPointer(GLuint index, GLint size, GLenum type, GLsizei stride, const void* pointer)
+{
+  glVertexAttribIPointer_ptr(index, size, type, stride, pointer);
+}
+
+GLAPI GLuint APIENTRY glGetUniformBlockIndex(GLuint program, const GLchar* uniformBlockName)
+{
+  return glGetUniformBlockIndex_ptr(program, uniformBlockName);
+}
+
+GLAPI void APIENTRY glUniformBlockBinding(GLuint program, GLuint uniformBlockIndex, GLuint uniformBlockBinding)
+{
+  glUniformBlockBinding_ptr(program, uniformBlockIndex, uniformBlockBinding);
+}
 // Loaded by default it seems, but I kept them here, just in case, must be OpenGL 1.0, and static linking
 /*
 static PFNGLTEXIMAGE2DPROC glTexImage2D_ptr;

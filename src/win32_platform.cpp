@@ -305,7 +305,11 @@ bool platform_create_window(int width, int height, char* title)
     const int contextAttribs[] =
     {
       WGL_CONTEXT_MAJOR_VERSION_ARB, 4,
+#ifdef LEGACY_OPENGL
+      WGL_CONTEXT_MINOR_VERSION_ARB, 1,
+#else      
       WGL_CONTEXT_MINOR_VERSION_ARB, 3,
+#endif
       WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
       WGL_CONTEXT_FLAGS_ARB, WGL_CONTEXT_DEBUG_BIT_ARB,
       0 // Terminate the Array

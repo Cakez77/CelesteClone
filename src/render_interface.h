@@ -8,8 +8,8 @@
 // #############################################################################
 //                           Renderer Constants
 // #############################################################################
-int RENDER_OPTION_FLIP_X = BIT(0);
-int RENDER_OPTION_FLIP_Y = BIT(1);
+const int RENDER_OPTION_FLIP_X = BIT(0);
+const int RENDER_OPTION_FLIP_Y = BIT(1);
 
 // #############################################################################
 //                           Renderer Structs
@@ -73,6 +73,14 @@ static RenderData* renderData;
 // #############################################################################
 //                           Renderer Untility
 // #############################################################################
+inline Mat4 get_ortho_projection(const OrthographicCamera2D& camera)
+{
+  return orthographic_projection(camera.position.x - camera.dimensions.x / 2.0f,
+                                camera.position.x + camera.dimensions.x / 2.0f,
+                                camera.position.y - camera.dimensions.y / 2.0f,
+                                camera.position.y + camera.dimensions.y / 2.0f);
+}
+
 IVec2 screen_to_world(IVec2 screenPos)
 {
   OrthographicCamera2D camera = renderData->gameCamera;

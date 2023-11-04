@@ -17,9 +17,9 @@
 // #############################################################################
 //                           Rendering Constants
 // #############################################################################
-int RENDERING_OPTION_FLIP_X = BIT(0);
-int RENDERING_OPTION_FLIP_Y = BIT(1);
-int RENDERING_OPTION_FONT = BIT(2);
+const int RENDERING_OPTION_FLIP_X = BIT(0);
+const int RENDERING_OPTION_FLIP_Y = BIT(1);
+const int RENDERING_OPTION_FONT = BIT(2);
 
 // #############################################################################
 //                           Rendering Structs

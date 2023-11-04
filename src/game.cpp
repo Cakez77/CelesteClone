@@ -107,13 +107,13 @@ void update_level(float dt)
 
     static Vec2 remainder = {};
     static bool grounded = false;
-    constexpr float runSpeed = 2.0f;
-    constexpr float runAcceleration = 10.0f;
-    constexpr float runReduce = 22.0f; 
-    constexpr float flyReduce = 12.0f;    
-    constexpr float gravity = 13.0f;
-    constexpr float fallSpeed = 3.6f;
-    constexpr float jumpSpeed = -3.0f;
+    const float runSpeed = 2.0f;
+    const float runAcceleration = 10.0f;
+    const float runReduce = 22.0f; 
+    const float flyReduce = 12.0f;    
+    const float gravity = 13.0f;
+    const float fallSpeed = 3.6f;
+    const float jumpSpeed = -3.0f;
 
     // Facing the Player in the right direction
     if(player.speed.x > 0)
